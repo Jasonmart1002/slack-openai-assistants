@@ -11,12 +11,13 @@ load_dotenv()
 
 app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 
+
 # Listen and handle messages 
 @app.message("")
 def message_handler(message, say, ack):
     ack()  # Acknowledge the event immediately
     user_query = message['text']
-    assistant_id = "asst_P3bdvDVwLXQ49vK2AVjZNCd6"
+    assistant_id = "asst_omsfgU3PXnHUyr0zn9cFatp4"
     from_user = message['user']
 
     def process_and_respond():
@@ -42,7 +43,6 @@ def message_handler(message, say, ack):
             say("Sorry, I couldn't process your request.", thread_ts=message['ts'])
 
     threading.Thread(target=process_and_respond).start()
-
 
 
 # Start your app
