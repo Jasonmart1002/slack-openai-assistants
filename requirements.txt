@@ -57,9 +57,7 @@ soupsieve==2.5
 SQLAlchemy==2.0.23
 sse-starlette==1.8.2
 starlette==0.32.0.post1
-tavily-python==0.3.0
 tenacity==8.2.3
-tiktoken==0.5.1
 tomlkit==0.12.3
 tqdm==4.66.1
 typer==0.9.0
