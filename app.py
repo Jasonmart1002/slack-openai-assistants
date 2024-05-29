@@ -11,9 +11,6 @@ load_dotenv()
 
 app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 
-# Dictionary to store the mapping of Slack thread_ts to OpenAI thread IDs
-thread_mapping = {}
-
 
 # Listen and handle messages
 @app.message("")
@@ -22,10 +19,9 @@ def message_handler(message, say, ack):
     user_query = message['text']
     assistant_id = "asst_omsfgU3PXnHUyr0zn9cFatp4"
     from_user = message['user']
-    thread_ts = message.get('thread_ts', message['ts'])  # Use the thread timestamp if it exists
 
     def process_and_respond():
-        response = process_thread_with_assistant(user_query, slack_thread_ts=thread_ts, assistant_id=assistant_id, from_user=from_user)
+        response = process_thread_with_assistant(user_query, assistant_id, from_user=from_user)
         if response:
             # Check if there are any in-memory files to upload
             if response.get("in_memory_files"):
@@ -37,15 +33,14 @@ def message_handler(message, say, ack):
                         file=in_memory_file,
                         filename="image.png",  # or dynamically set the filename
                         initial_comment=annotation_text,  # Text response as annotation
-                        title="Uploaded Image",
-                        thread_ts=thread_ts  # Ensure the file is posted in the correct thread
+                        title="Uploaded Image"
                     )
             else:
                 # If no files to upload, send text responses normally
                 for text in response.get("text", []):
-                    say(text, thread_ts=thread_ts)  # Ensure the response is posted in the correct thread
+                    say(text, thread_ts=message['ts'])
         else:
-            say("Sorry, I couldn't process your request.", thread_ts=thread_ts)
+            say("Sorry, I couldn't process your request.", thread_ts=message['ts'])
 
     threading.Thread(target=process_and_respond).start()
 
