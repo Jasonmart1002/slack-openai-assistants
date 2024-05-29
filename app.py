@@ -3,16 +3,20 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from dotenv import load_dotenv
 import threading
+from flask import Flask, request
 
 # Import the function from assistants.py
 from assistants import process_thread_with_assistant
 
 load_dotenv()
 
+# Initialize the Slack app
 app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 
+# Create a Flask web server
+flask_app = Flask(__name__)
 
-# Listen and handle messages 
+
 @app.message("")
 def message_handler(message, say, ack):
     ack()  # Acknowledge the event immediately
@@ -27,7 +31,8 @@ def message_handler(message, say, ack):
             if response.get("in_memory_files"):
                 for i, in_memory_file in enumerate(response["in_memory_files"]):
                     # Use the corresponding text as the annotation for the file
-                    annotation_text = response["text"][i] if i < len(response["text"]) else "Here's the file you requested:"
+                    annotation_text = response["text"][i] if i < len(
+                        response["text"]) else "Here's the file you requested:"
                     app.client.files_upload(
                         channels=message['channel'],
                         file=in_memory_file,
@@ -45,6 +50,17 @@ def message_handler(message, say, ack):
     threading.Thread(target=process_and_respond).start()
 
 
+@flask_app.route('/')
+def index():
+    return "Hello, this is the Slack Bot running."
+
+
 # Start your app
 if __name__ == "__main__":
-    SocketModeHandler(app, os.environ.get("SLACK_APP_TOKEN")).start()
+    # Get the port number from the environment variable
+    port = int(os.environ.get("PORT", 3000))
+    # Run the Flask app
+    flask_app.run(host='0.0.0.0', port=port)
+
+    # Start the Slack app in a separate thread to keep it running
+    threading.Thread(target=SocketModeHandler(app, os.environ.get("SLACK_APP_TOKEN")).start).start()
