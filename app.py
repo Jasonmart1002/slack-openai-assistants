@@ -3,20 +3,16 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from dotenv import load_dotenv
 import threading
-from flask import Flask, request
 
 # Import the function from assistants.py
 from assistants import process_thread_with_assistant
 
 load_dotenv()
 
-# Initialize the Slack app
 app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 
-# Create a Flask web server
-flask_app = Flask(__name__)
 
-
+# Listen and handle messages
 @app.message("")
 def message_handler(message, say, ack):
     ack()  # Acknowledge the event immediately
@@ -49,17 +45,6 @@ def message_handler(message, say, ack):
     threading.Thread(target=process_and_respond).start()
 
 
-@flask_app.route('/')
-def index():
-    return "Hello, this is the Slack Bot running."
-
-
 # Start your app
 if __name__ == "__main__":
-    # Get the port number from the environment variable
-    port = int(os.environ.get("PORT", 3000))
-    # Run the Flask app
-    flask_app.run(host='0.0.0.0', port=port)
-
-    # Start the Slack app in a separate thread to keep it running
-    threading.Thread(target=SocketModeHandler(app, os.environ.get("SLACK_APP_TOKEN")).start).start()
+    SocketModeHandler(app, os.environ.get("SLACK_APP_TOKEN")).start()
