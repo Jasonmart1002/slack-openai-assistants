@@ -31,8 +31,7 @@ def message_handler(message, say, ack):
             if response.get("in_memory_files"):
                 for i, in_memory_file in enumerate(response["in_memory_files"]):
                     # Use the corresponding text as the annotation for the file
-                    annotation_text = response["text"][i] if i < len(
-                        response["text"]) else "Here's the file you requested:"
+                    annotation_text = response["text"][i] if i < len(response["text"]) else "Here's the file you requested:"
                     app.client.files_upload(
                         channels=message['channel'],
                         file=in_memory_file,
