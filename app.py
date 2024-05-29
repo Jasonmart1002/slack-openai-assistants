@@ -11,6 +11,9 @@ load_dotenv()
 
 app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 
+# Dictionary to store the mapping of Slack thread_ts to OpenAI thread IDs
+thread_mapping = {}
+
 
 # Listen and handle messages
 @app.message("")
@@ -22,7 +25,7 @@ def message_handler(message, say, ack):
     thread_ts = message.get('thread_ts', message['ts'])  # Use the thread timestamp if it exists
 
     def process_and_respond():
-        response = process_thread_with_assistant(user_query, thread_id=thread_ts, assistant_id=assistant_id, from_user=from_user)
+        response = process_thread_with_assistant(user_query, slack_thread_ts=thread_ts, assistant_id=assistant_id, from_user=from_user)
         if response:
             # Check if there are any in-memory files to upload
             if response.get("in_memory_files"):
