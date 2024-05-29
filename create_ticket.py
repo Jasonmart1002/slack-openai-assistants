@@ -3,7 +3,6 @@ import uuid
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from dotenv import load_dotenv
-from create_ticket import create_ticket, app
 
 
 # Load environment variables
@@ -11,6 +10,7 @@ load_dotenv()
 
 # Initialize the Slack Bolt App with the bot token
 app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
+
 
 def create_ticket(client, subject, from_user, type_of_question, description):
     """
