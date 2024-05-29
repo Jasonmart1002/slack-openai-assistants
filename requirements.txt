@@ -8,6 +8,7 @@ beautifulsoup4==4.12.2
 certifi==2023.11.17
 charset-normalizer==3.3.2
 click==8.1.7
+flask
 colorama==0.4.6
 dataclasses-json==0.6.3
 distro==1.8.0
