@@ -35,7 +35,8 @@ def message_handler(message, say, ack):
 
     def process_and_respond():
         openai_thread_id = thread_mapping.get(slack_thread_ts)
-        response = process_thread_with_assistant(user_query, assistant_id, from_user=from_user, thread_ts=openai_thread_id)
+        response = process_thread_with_assistant(user_query, assistant_id, from_user=from_user,
+                                                 thread_ts=slack_thread_ts)
         if response:
             # If it's a new thread, store the new OpenAI thread ID
             if openai_thread_id is None:
@@ -53,6 +54,7 @@ def message_handler(message, say, ack):
             say("Sorry, I couldn't process your request.", thread_ts=slack_thread_ts)  # Ensure reply is in the same thread
 
     threading.Thread(target=process_and_respond).start()
+
 
 # Start your app
 if __name__ == "__main__":

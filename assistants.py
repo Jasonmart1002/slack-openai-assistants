@@ -12,6 +12,7 @@ from create_ticket import create_ticket, app
 load_dotenv()
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
+
 def execute_function(function_name, arguments, from_user):
     """
     Execute a function based on the function name and provided arguments.
@@ -23,6 +24,7 @@ def execute_function(function_name, arguments, from_user):
         return create_ticket(app.client, subject, from_user, type_of_question, description)
     else:
         return "Function not recognized"
+
 
 def process_thread_with_assistant(user_query, assistant_id, model="gpt-4-1106-preview", from_user=None, thread_ts=None):
     """
