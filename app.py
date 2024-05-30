@@ -9,13 +9,7 @@ from assistants import process_thread_with_assistant
 
 load_dotenv()
 
-print("SLACK_BOT_TOKEN:", os.environ.get("SLACK_BOT_TOKEN"))
-print("SLACK_APP_TOKEN:", os.environ.get("SLACK_APP_TOKEN"))
-
 app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
-
-# Check if app is callable
-print("Is app callable?", callable(app))
 
 # Listen and handle messages
 @app.message("")
@@ -51,4 +45,5 @@ def message_handler(message, say, ack):
 
 # Start your app
 if __name__ == "__main__":
+    print("Starting Slack Bolt app...")
     SocketModeHandler(app, os.environ.get("SLACK_APP_TOKEN")).start()
