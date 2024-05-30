@@ -3,22 +3,17 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from dotenv import load_dotenv
 import threading
-from flask import Flask
-# Configure logging
-import logging
 
 # Import the function from assistants.py
 from assistants import process_thread_with_assistant
 
 load_dotenv()
 
-slack_app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
-
-logging.basicConfig(level=logging.INFO)
+app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 
 
 # Listen and handle messages
-@slack_app.message("")
+@app.message("")
 def message_handler(message, say, ack):
     ack()  # Acknowledge the event immediately
     user_query = message['text']
@@ -32,9 +27,8 @@ def message_handler(message, say, ack):
             if response.get("in_memory_files"):
                 for i, in_memory_file in enumerate(response["in_memory_files"]):
                     # Use the corresponding text as the annotation for the file
-                    annotation_text = response["text"][i] if i < len(
-                        response["text"]) else "Here's the file you requested:"
-                    slack_app.client.files_upload(
+                    annotation_text = response["text"][i] if i < len(response["text"]) else "Here's the file you requested:"
+                    app.client.files_upload(
                         channels=message['channel'],
                         file=in_memory_file,
                         filename="image.png",  # or dynamically set the filename
@@ -51,27 +45,6 @@ def message_handler(message, say, ack):
     threading.Thread(target=process_and_respond).start()
 
 
-# Create a Flask web server to keep the app running
-flask_app = Flask(__name__)
-
-
-@flask_app.route('/')
-def home():
-    return "Slack Bolt App is running!"
-
-
 # Start your app
 if __name__ == "__main__":
-    # Get the port from environment variables, or default to 3000
-    port = int(os.environ.get("PORT", 3000))
-
-
-    # Start the SocketModeHandler in a separate thread
-    def start_socket_mode_handler():
-        SocketModeHandler(slack_app, os.environ.get("SLACK_APP_TOKEN")).start()
-
-
-    threading.Thread(target=start_socket_mode_handler).start()
-
-    # Start the Flask web server
-    flask_app.run(host='0.0.0.0', port=port)
+    SocketModeHandler(app, os.environ.get("SLACK_APP_TOKEN")).start()
