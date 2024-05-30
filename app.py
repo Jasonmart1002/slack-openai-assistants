@@ -16,7 +16,6 @@ app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 thread_mapping = {}
 processed_events = set()  # Set to store processed event IDs
 
-
 # Listen and handle messages
 @app.message("")
 def message_handler(message, say, ack):
@@ -54,7 +53,6 @@ def message_handler(message, say, ack):
             say("Sorry, I couldn't process your request.", thread_ts=slack_thread_ts)  # Ensure reply is in the same thread
 
     threading.Thread(target=process_and_respond).start()
-
 
 # Start your app
 if __name__ == "__main__":

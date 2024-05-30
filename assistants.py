@@ -12,7 +12,6 @@ from create_ticket import create_ticket, app
 load_dotenv()
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
-
 def execute_function(function_name, arguments, from_user):
     """
     Execute a function based on the function name and provided arguments.
@@ -25,8 +24,7 @@ def execute_function(function_name, arguments, from_user):
     else:
         return "Function not recognized"
 
-
-def process_thread_with_assistant(user_query, assistant_id, model="gpt-4-1106-preview", from_user=None):
+def process_thread_with_assistant(user_query, assistant_id, model="gpt-4-1106-preview", from_user=None, thread_ts=None):
     """
     Process a thread with an assistant and handle the response which includes text and images.
 
@@ -34,6 +32,7 @@ def process_thread_with_assistant(user_query, assistant_id, model="gpt-4-1106-pr
     :param assistant_id: The ID of the assistant to be used.
     :param model: The model version of the assistant.
     :param from_user: The user ID from whom the query originated.
+    :param thread_ts: The Slack thread timestamp.
     :return: A dictionary containing text responses and in-memory file objects.
     """
     response_texts = []  # List to store text responses
@@ -123,15 +122,8 @@ def process_thread_with_assistant(user_query, assistant_id, model="gpt-4-1106-pr
                 break
             sleep(1)
 
-        return {"text": response_texts, "in_memory_files": in_memory_files}
+        return {"text": response_texts, "in_memory_files": in_memory_files, "thread_id": thread.id}
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        return {"text": [], "in_memory_files": []}
-
-# Example usage
-#user_query = "Show me a sample pie chart"
-#assistant_id = "asst_P3bdvDVwLXQ49vK2AVjZNCd6"
-#from_user_id = "U052337J8QH"
-#response = process_thread_with_assistant(user_query, assistant_id, from_user=from_user_id)
-#print("Final response:", response)
+        return {"text": [], "in_memory_files": [], "thread_id": None}
