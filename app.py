@@ -4,20 +4,21 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from dotenv import load_dotenv
 import threading
 from flask import Flask
+# Configure logging
+import logging
 
 # Import the function from assistants.py
 from assistants import process_thread_with_assistant
 
 load_dotenv()
 
-app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
+slack_app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 
-# Configure logging
-import logging
 logging.basicConfig(level=logging.INFO)
 
+
 # Listen and handle messages
-@app.message("")
+@slack_app.message("")
 def message_handler(message, say, ack):
     ack()  # Acknowledge the event immediately
     user_query = message['text']
@@ -31,8 +32,9 @@ def message_handler(message, say, ack):
             if response.get("in_memory_files"):
                 for i, in_memory_file in enumerate(response["in_memory_files"]):
                     # Use the corresponding text as the annotation for the file
-                    annotation_text = response["text"][i] if i < len(response["text"]) else "Here's the file you requested:"
-                    app.client.files_upload(
+                    annotation_text = response["text"][i] if i < len(
+                        response["text"]) else "Here's the file you requested:"
+                    slack_app.client.files_upload(
                         channels=message['channel'],
                         file=in_memory_file,
                         filename="image.png",  # or dynamically set the filename
@@ -52,18 +54,22 @@ def message_handler(message, say, ack):
 # Create a Flask web server to keep the app running
 flask_app = Flask(__name__)
 
+
 @flask_app.route('/')
 def home():
     return "Slack Bolt App is running!"
+
 
 # Start your app
 if __name__ == "__main__":
     # Get the port from environment variables, or default to 3000
     port = int(os.environ.get("PORT", 3000))
 
+
     # Start the SocketModeHandler in a separate thread
     def start_socket_mode_handler():
-        SocketModeHandler(app, os.environ.get("SLACK_APP_TOKEN")).start()
+        SocketModeHandler(slack_app, os.environ.get("SLACK_APP_TOKEN")).start()
+
 
     threading.Thread(target=start_socket_mode_handler).start()
 
