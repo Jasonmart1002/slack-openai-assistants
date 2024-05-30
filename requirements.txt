@@ -19,6 +19,9 @@ frozenlist==1.4.1
 gitdb==4.0.11
 GitPython==3.1.40
 h11==0.14.0
+slack-bolt
+python-dotenv
+gunicorn
 gunicorn
 httpcore==1.0.2
 httpx==0.25.2
