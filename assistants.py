@@ -42,39 +42,21 @@ def process_thread_with_assistant(user_query, assistant_id, model="gpt-4-1106-pr
     in_memory_files = []  # List to store in-memory file objects
 
     try:
-        if thread_ts:
-            thread_id = thread_ts
-            print(f"Using existing thread with ID: {thread_id}")
-        else:
-            print("Creating a new thread for the user query...")
-            thread = openai.Client().beta.threads.create()
-            thread_id = thread.id
-            print(f"New thread created with ID: {thread_id}")
+        print("Creating a thread for the user query...")
+        thread = openai.Client().beta.threads.create()
+        print(f"Thread created with ID: {thread.id}")
 
-        # Fetch previous messages from the same thread
-        previous_messages = []
-        if thread_id:
-            messages = openai.Client().beta.threads.messages.list(thread_id=thread_id)
-            for message in messages.data:
-                if message.role == "user":
-                    previous_messages.append({"role": "user", "content": message.content})
-                elif message.role == "assistant":
-                    previous_messages.append({"role": "assistant", "content": message.content})
-
-        # Add the current user query to the previous messages
-        previous_messages.append({"role": "user", "content": user_query})
-
-        print("Adding the user query and previous messages as a message to the thread...")
+        print("Adding the user query as a message to the thread...")
         openai.Client().beta.threads.messages.create(
-            thread_id=thread_id,
+            thread_id=thread.id,
             role="user",
-            content=previous_messages
+            content=user_query
         )
-        print("User query and previous messages added to the thread.")
+        print("User query added to the thread.")
 
         print("Creating a run to process the thread with the assistant...")
         run = openai.Client().beta.threads.runs.create(
-            thread_id=thread_id,
+            thread_id=thread.id,
             assistant_id=assistant_id,
             model=model
         )
@@ -83,7 +65,7 @@ def process_thread_with_assistant(user_query, assistant_id, model="gpt-4-1106-pr
         while True:
             print("Checking the status of the run...")
             run_status = openai.Client().beta.threads.runs.retrieve(
-                thread_id=thread_id,
+                thread_id=thread.id,
                 run_id=run.id
             )
             print(f"Current status of the run: {run_status.status}")
@@ -99,7 +81,7 @@ def process_thread_with_assistant(user_query, assistant_id, model="gpt-4-1106-pr
 
                 print("Submitting tool outputs...")
                 openai.Client().beta.threads.runs.submit_tool_outputs(
-                    thread_id=thread_id,
+                    thread_id=thread.id,
                     run_id=run.id,
                     tool_outputs=[{
                         "tool_call_id": tool_call.id,
@@ -110,7 +92,7 @@ def process_thread_with_assistant(user_query, assistant_id, model="gpt-4-1106-pr
 
             elif run_status.status in ["completed", "failed", "cancelled"]:
                 print("Fetching messages added by the assistant...")
-                messages = openai.Client().beta.threads.messages.list(thread_id=thread_id)
+                messages = openai.Client().beta.threads.messages.list(thread_id=thread.id)
                 for message in messages.data:
                     if message.role == "assistant":
                         for content in message.content:
@@ -142,7 +124,7 @@ def process_thread_with_assistant(user_query, assistant_id, model="gpt-4-1106-pr
                 break
             sleep(1)
 
-        return {"text": response_texts, "in_memory_files": in_memory_files, "thread_id": thread_id}
+        return {"text": response_texts, "in_memory_files": in_memory_files, "thread_id": thread.id}
 
     except Exception as e:
         print(f"An error occurred: {e}")
