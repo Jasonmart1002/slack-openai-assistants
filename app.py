@@ -3,7 +3,7 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from dotenv import load_dotenv
 import threading
-import logging
+from flask import Flask
 
 # Import the function from assistants.py
 from assistants import process_thread_with_assistant
@@ -13,6 +13,7 @@ load_dotenv()
 app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 
 # Configure logging
+import logging
 logging.basicConfig(level=logging.INFO)
 
 # Listen and handle messages
@@ -48,17 +49,15 @@ def message_handler(message, say, ack):
     threading.Thread(target=process_and_respond).start()
 
 
+# Create a Flask web server to keep the app running
+flask_app = Flask(__name__)
+
+@flask_app.route('/')
+def home():
+    return "Slack Bolt App is running!"
+
 # Start your app
 if __name__ == "__main__":
-    from flask import Flask, request
-
-    # Create a Flask web server to keep the app running
-    flask_app = Flask(__name__)
-
-    @flask_app.route('/')
-    def home():
-        return "Slack Bolt App is running!"
-
     # Get the port from environment variables, or default to 3000
     port = int(os.environ.get("PORT", 3000))
 
